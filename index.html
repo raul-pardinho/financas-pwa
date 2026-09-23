@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123a46">
+  <meta name="description" content="Painel financeiro pessoal local-first para Budget, Forecast e Realizado.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>Finanças — Raul & Letícia</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div><p class="eyebrow">Gestão financeira familiar</p><h1>Finanças</h1></div>
+  <div class="top-actions">
+    <button id="installBtn" class="button ghost hidden" type="button">Instalar app</button>
+    <button id="pdfBtn" class="button ghost" type="button">Baixar snapshot PDF</button>
+    <label class="button primary file-button">Importar XLSX<input id="fileInput" type="file" accept=".xlsx,.xls" hidden></label>
+  </div>
+</header>
+<main>
+  <section id="emptyState" class="empty-state">
+    <div class="empty-card">
+      <div class="empty-icon">↥</div>
+      <h2>Importe a Base Mestre</h2>
+      <p>Baixe a planilha <strong>Finanças Pessoais — Base Mestre</strong> do Google Drive como Excel e importe o arquivo aqui. Os dados permanecem neste dispositivo.</p>
+      <label class="button primary file-button large">Selecionar arquivo XLSX<input id="fileInputMirror" type="file" accept=".xlsx,.xls" hidden></label>
+    </div>
+  </section>
+  <section id="appShell" class="hidden">
+    <div class="toolbar card no-print">
+      <div class="control-group"><label for="monthSelect">Mês</label><select id="monthSelect"></select></div>
+      <div class="control-group"><span class="label">Visão</span><div class="segmented" id="viewToggle">
+        <button type="button" data-view="COMPETENCIA" class="active">Competência</button>
+        <button type="button" data-view="CAIXA">Caixa</button>
+      </div></div>
+      <div class="data-status"><span id="dataFreshness">Base não carregada</span><button id="clearDataBtn" class="text-button" type="button">Limpar dados locais</button></div>
+    </div>
+    <section id="snapshot" class="snapshot">
+      <div id="printHeader" class="snapshot-header print-only"><div><p class="eyebrow">Snapshot financeiro familiar</p><h2 id="printTitle">—</h2></div><p id="printMeta">—</p></div>
+      <div id="headlineCards" class="kpi-grid"></div>
+      <div class="grid-2">
+        <article class="card"><div class="section-heading"><div><p class="eyebrow">Resultado</p><h2>Budget × Forecast × Realizado</h2></div><span id="resultBadge" class="status-pill">—</span></div><div id="resultChart" class="result-chart"></div></article>
+        <article class="card"><div class="section-heading"><div><p class="eyebrow">Autonomia</p><h2>Cotas pessoais</h2></div></div><div id="quotaCards" class="quota-stack"></div></article>
+      </div>
+      <article class="card"><div class="section-heading"><div><p class="eyebrow">Categorias</p><h2>Orçado × realizado</h2></div><p class="section-note">Despesas exibidas como valores positivos.</p></div>
+        <div class="table-wrap"><table><thead><tr><th>Categoria</th><th>Budget</th><th>Forecast</th><th>Realizado</th><th>Desvio vs Budget</th><th>Status</th></tr></thead><tbody id="categoryTable"></tbody></table></div>
+      </article>
+      <div class="grid-2">
+        <article class="card"><div class="section-heading"><div><p class="eyebrow">Próximos meses</p><h2>Compromissos futuros</h2></div></div><div id="commitmentChart" class="bar-list"></div></article>
+        <article class="card"><div class="section-heading"><div><p class="eyebrow">Liquidez</p><h2>Reserva familiar projetada</h2></div></div><div id="reserveProjection" class="reserve-panel"></div></article>
+      </div>
+      <div class="grid-2">
+        <article class="card"><div class="section-heading"><div><p class="eyebrow">Balanço</p><h2>Patrimônio</h2></div></div><div id="patrimonyCards" class="mini-kpi-grid"></div></article>
+        <article class="card"><div class="section-heading"><div><p class="eyebrow">Qualidade dos dados</p><h2>Pendências</h2></div></div><div id="pendingSummary"></div></article>
+      </div>
+      <article class="card"><div class="section-heading"><div><p class="eyebrow">Forecast anual</p><h2>Resultado e reserva</h2></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Mês</th><th>Receita forecast</th><th>Despesas forecast</th><th>Aporte reserva</th><th>Resultado antes da reserva</th></tr></thead><tbody id="forecastTable"></tbody></table></div>
+      </article>
+    </section>
+    <p class="footer-note">Fonte oficial: Google Sheets privado. Este app mantém apenas uma cópia local para visualização.</p>
+  </section>
+</main>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+</body>
+</html>
