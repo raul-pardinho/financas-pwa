@@ -1,5 +1,5 @@
 (()=>{
-const DB='financas_local_v1',STORE='workbook',THEME='financas_theme',APP_VERSION='1.1.2';
+const DB='financas_local_v1',STORE='workbook',THEME='financas_theme',APP_VERSION='1.1.3';
 const state={data:null,month:null,view:'COMPETENCIA',deferredPrompt:null,theme:'light'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}),monthFmt=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'});
@@ -19,7 +19,7 @@ function workbook(buf,name){if(!window.XLSX)throw Error('Biblioteca XLSX não ca
 function controls(){return Object.fromEntries((state.data?.sheets?.controle||[]).map(r=>[String(r.chave),r.valor]))}
 function months(){const s=new Set();(state.data?.sheets?.planejamento||[]).forEach(r=>{const m=pm(r.competencia);if(m)s.add(m)});(state.data?.sheets?.movimentacoes||[]).forEach(r=>{[pm(r.competencia||r.data_transacao),pm(r.data_caixa)].forEach(m=>m&&s.add(m))});return[...s].sort()}
 function plan(month=state.month,scenario=null,view=state.view){return(state.data?.sheets?.planejamento||[]).filter(r=>pm(r.competencia)===month&&(!scenario||String(r.cenario).toUpperCase()===scenario)&&String(r.visao).toUpperCase()===view)}
-function rawMov(month=state.month,view=state.view){const today=new Date().toISOString().slice(0,10);return(state.data?.sheets?.movimentacoes||[]).filter(r=>{if(String(r.status_movimento||'REALIZADO').toUpperCase()==='CANCELADO')return false;if(view==='CAIXA'){const dc=String(r.data_caixa||'');return pm(dc)===month&&dc&&dc<=today}return pm(r.competencia||r.data_transacao)===month})}
+function rawMov(month=state.month,view=state.view){const today=new Date().toISOString().slice(0,10);return(state.data?.sheets?.movimentacoes||[]).filter(r=>{if(String(r.status_movimento||'REALIZADO').toUpperCase()==='CANCELADO')return false;if(view==='CAIXA'){const dc=String(r.data_caixa||'');return pm(dc)===month&&dc&&dc<=today}if(String(r.categoria||'').toUpperCase()==='FATURA_CARTAO_PAGA_PENDENTE')return false;return pm(r.competencia||r.data_transacao)===month})}
 function futureCardOneTime(m){const today=new Date().toISOString().slice(0,10);return(state.data?.sheets?.movimentacoes||[]).reduce((a,r)=>{const dc=String(r.data_caixa||''),type=String(r.tipo||'').toUpperCase(),grp=String(r.grupo||'').toUpperCase(),v=n(r.valor);if(pm(dc)!==m||dc<=today||type==='PARCELA'||v>=0||nonOp.has(grp)||grp==='RECEITA')return a;return a+Math.abs(v)},0)}
 function mov(month=state.month,view=state.view){const a=rawMov(month,view);if(view!=='COMPETENCIA')return a;const out=[],seen=new Set();for(const r of a){if(String(r.tipo||'').toUpperCase()==='PARCELA'&&Math.abs(n(r.valor_total_compra))>0){const key=String(r.id_parcelamento||[r.titular,r.data_transacao,r.estabelecimento,r.valor_total_compra,r.parcelas_total].join('|'));if(seen.has(key))continue;seen.add(key);out.push({...r,valor:(n(r.valor)<0?-1:1)*Math.abs(n(r.valor_total_compra))})}else out.push(r)}return out}
 function op(r){return!nonOp.has(String(r.grupo||'').toUpperCase())}
