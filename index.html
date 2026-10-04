@@ -4,28 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#123a46" />
-  <meta name="description" content="Painel financeiro pessoal local-first para Budget, Forecast e Realizado." />
+  <meta name="description" content="Gestão financeira familiar: orçamento, metas, forecast, patrimônio, dívidas e caixa." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <title>Finanças — Raul & Letícia</title>
   <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <div>
+    <div class="brand">
       <p class="eyebrow">Gestão financeira familiar</p>
-      <h1>Finanças</h1>
+      <div class="brand-line">
+        <h1>Finanças</h1>
+        <span class="beta">Dashboard V2</span>
+      </div>
     </div>
     <div class="top-actions">
-      <button id="themeToggle" class="button ghost" type="button" aria-label="Alternar tema">☾ Dark mode</button>
-      <button id="installBtn" class="button ghost hidden" type="button">Instalar app</button>
-      <button id="pdfBtn" class="button ghost" type="button">Baixar snapshot PDF</button>
+      <button id="themeToggle" class="button ghost" type="button">☾ Dark</button>
       <label class="button primary file-button">
-        Importar XLSX
+        Atualizar base
         <input id="fileInput" type="file" accept=".xlsx,.xls" hidden />
       </label>
     </div>
@@ -36,88 +35,66 @@
       <div class="empty-card">
         <div class="empty-icon">↥</div>
         <h2>Importe a Base Mestre</h2>
-        <p>Baixe a planilha <strong>Finanças Pessoais — Base Mestre</strong> do Google Drive como Excel e importe o arquivo aqui. Os dados ficam armazenados somente neste dispositivo.</p>
-        <label class="button primary file-button large">
-          Selecionar arquivo XLSX
+        <p>O app funciona localmente. Exporte a planilha <strong>Finanças Pessoais — Base Mestre</strong> como XLSX e importe aqui.</p>
+        <label class="button primary large file-button">
+          Selecionar XLSX
           <input class="file-input-mirror" type="file" accept=".xlsx,.xls" hidden />
         </label>
       </div>
     </section>
 
     <section id="appShell" class="hidden">
-      <div class="toolbar card no-print">
-        <div class="control-group">
-          <label for="monthSelect">Mês</label>
+      <div class="app-controls no-print">
+        <div class="month-control">
+          <label for="monthSelect">Período</label>
           <select id="monthSelect"></select>
         </div>
-        <div class="control-group">
-          <span class="label">Visão</span>
-          <div class="segmented" id="viewToggle">
-            <button type="button" data-view="COMPETENCIA" class="active">Competência</button>
-            <button type="button" data-view="CAIXA">Caixa</button>
-          </div>
+        <div class="source-status">
+          <strong id="dataStatus">—</strong>
+          <span id="budgetSource">—</span>
         </div>
-        <div class="data-status">
-          <span id="dataFreshness">Base não carregada</span>
-          <button id="clearDataBtn" type="button" class="text-button">Limpar dados locais</button>
-        </div>
+        <button id="clearDataBtn" class="text-button" type="button">Limpar base local</button>
       </div>
 
-      <section id="snapshot" class="snapshot">
-        <div class="snapshot-header print-only">
+      <nav class="tabs no-print" aria-label="Navegação do dashboard">
+        <button class="tab active" data-page="overview">Visão geral</button>
+        <button class="tab" data-page="budget">Orçamento</button>
+        <button class="tab" data-page="patrimony">Patrimônio</button>
+        <button class="tab" data-page="debts">Dívidas</button>
+        <button class="tab" data-page="thirdparty">Terceiros</button>
+        <button class="tab" data-page="cash">Cartões & Caixa</button>
+      </nav>
+
+      <section class="page active" data-page="overview">
+        <div class="page-heading">
           <div>
-            <p class="eyebrow">Snapshot financeiro familiar</p>
-            <h2 id="printTitle">—</h2>
+            <p class="eyebrow">Visão geral</p>
+            <h2 id="overviewTitle">Como estamos no mês</h2>
           </div>
-          <p id="printMeta">—</p>
+          <span id="monthHealth" class="status-pill neutral">—</span>
         </div>
 
-        <div id="headlineCards" class="kpi-grid"></div>
+        <div id="overviewKpis" class="kpi-grid six"></div>
 
-        <div class="grid-2">
+        <div class="grid-2 overview-grid">
           <article class="card">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Resultado</p>
-                <h2 id="resultTitle">Budget × Forecast × Realizado</h2>
+                <p class="eyebrow">Trajetória</p>
+                <h3>Orçamento × Meta × Realizado × Forecast</h3>
               </div>
-              <span id="resultBadge" class="status-pill neutral">—</span>
             </div>
-            <div id="resultChart" class="result-chart"></div>
+            <div id="monthlyProgress" class="progress-panel"></div>
           </article>
 
           <article class="card">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Autonomia</p>
-                <h2>Cotas pessoais</h2>
+                <p class="eyebrow">Atenção</p>
+                <h3>Alertas do mês</h3>
               </div>
             </div>
-            <div id="quotaCards" class="quota-stack"></div>
-          </article>
-        </div>
-
-        <div class="grid-2">
-          <article class="card">
-            <div class="section-heading compact">
-              <div>
-                <p class="eyebrow">Leitura executiva</p>
-                <h2>Ponte competência × caixa</h2>
-              </div>
-              <p class="section-note">Explica por que o caixa do mês pode divergir do consumo econômico.</p>
-            </div>
-            <div id="bridgePanel" class="bridge-grid"></div>
-          </article>
-
-          <article class="card">
-            <div class="section-heading compact">
-              <div>
-                <p class="eyebrow">Terceiros</p>
-                <h2>Parcelas do Heitor</h2>
-              </div>
-              <p class="section-note">Exposição separada do orçamento familiar.</p>
-            </div>
-            <div id="heitorPanel"></div>
+            <div id="alertsPanel" class="alerts-list"></div>
           </article>
         </div>
 
@@ -125,114 +102,194 @@
           <div class="section-heading">
             <div>
               <p class="eyebrow">Categorias</p>
-              <h2 id="categoryTitle">Orçado × realizado</h2>
+              <h3>Onde o mês deve terminar</h3>
             </div>
-            <p id="categoryNote" class="section-note">Valores de despesa exibidos como positivos para facilitar a leitura.</p>
+            <p class="section-note">As maiores pressões e folgas projetadas em relação ao orçamento.</p>
+          </div>
+          <div id="overviewCategoryBars" class="category-bars"></div>
+        </article>
+
+        <div class="grid-3">
+          <article class="card compact-card">
+            <p class="eyebrow">Liquidez</p>
+            <h3>Reserva familiar</h3>
+            <div id="overviewReserve"></div>
+          </article>
+          <article class="card compact-card">
+            <p class="eyebrow">Dívidas</p>
+            <h3>Saldo devedor</h3>
+            <div id="overviewDebt"></div>
+          </article>
+          <article class="card compact-card">
+            <p class="eyebrow">Terceiros</p>
+            <h3>Exposição no seu crédito</h3>
+            <div id="overviewThirdParty"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" data-page="budget">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Orçamento</p>
+            <h2>Budget, Meta, Realizado e Forecast</h2>
+          </div>
+          <div class="legend-inline">
+            <span><i class="dot budget"></i>Orçado</span>
+            <span><i class="dot target"></i>Meta</span>
+            <span><i class="dot realized"></i>Realizado</span>
+            <span><i class="dot forecast"></i>Forecast</span>
+          </div>
+        </div>
+
+        <div id="budgetKpis" class="kpi-grid five"></div>
+
+        <article class="card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Gestão mensal</p>
+              <h3>Orçado × realizado por categoria</h3>
+            </div>
+            <p id="pacingNote" class="section-note">Forecast calculado conforme a natureza de cada categoria.</p>
           </div>
           <div class="table-wrap">
-            <table>
+            <table class="budget-table">
               <thead>
                 <tr>
                   <th>Categoria</th>
-                  <th>Budget</th>
+                  <th>Orçado</th>
+                  <th>Meta</th>
+                  <th>Realizado MTD</th>
                   <th>Forecast</th>
-                  <th>Realizado</th>
-                  <th>Desvio vs Budget</th>
+                  <th>Δ Orçamento</th>
+                  <th>Δ Meta</th>
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody id="categoryTable"></tbody>
+              <tbody id="budgetTable"></tbody>
             </table>
           </div>
         </article>
 
-        <div class="grid-2">
-          <article class="card">
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow">Próximos meses</p>
-                <h2>Compromissos futuros</h2>
-              </div>
+        <article class="card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Leitura visual</p>
+              <h3>Principais categorias</h3>
             </div>
-            <div id="commitmentChart" class="bar-list"></div>
-          </article>
+          </div>
+          <div id="budgetChart" class="budget-chart"></div>
+        </article>
+      </section>
 
-          <article class="card">
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow">Liquidez</p>
-                <h2>Reserva familiar projetada</h2>
-              </div>
+      <section class="page" data-page="patrimony">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Patrimônio</p>
+            <h2>Quanto temos e como evolui</h2>
+          </div>
+        </div>
+        <div id="patrimonyKpis" class="kpi-grid four"></div>
+        <article class="card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Histórico</p>
+              <h3>Evolução patrimonial</h3>
             </div>
-            <div id="reserveProjection" class="reserve-panel"></div>
-          </article>
+          </div>
+          <div id="patrimonyEvolution" class="evolution-panel"></div>
+        </article>
+        <article class="card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Composição</p>
+              <h3>Ativos e passivos atuais</h3>
+            </div>
+          </div>
+          <div id="patrimonyComposition" class="split-list"></div>
+        </article>
+      </section>
+
+      <section class="page" data-page="debts">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Dívidas</p>
+            <h2>Obrigações familiares</h2>
+          </div>
+        </div>
+        <div id="debtKpis" class="kpi-grid four"></div>
+        <div id="debtList" class="debt-list"></div>
+      </section>
+
+      <section class="page" data-page="thirdparty">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Terceiros</p>
+            <h2>Valores emprestados e exposição</h2>
+          </div>
+        </div>
+        <div id="thirdPartyKpis" class="kpi-grid four"></div>
+        <article class="card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Parcelamentos</p>
+              <h3>Compromissos em seu crédito</h3>
+            </div>
+          </div>
+          <div id="thirdPartyList" class="thirdparty-list"></div>
+        </article>
+      </section>
+
+      <section class="page" data-page="cash">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Operacional</p>
+            <h2>Cartões & Caixa</h2>
+          </div>
+          <span class="status-pill neutral">Não altera o orçamento por competência</span>
         </div>
 
-        <article class="card">
-          <div class="section-heading compact">
-            <div>
-              <p class="eyebrow">Balanço</p>
-              <h2>Evolução patrimonial</h2>
-            </div>
-            <p class="section-note">A evolução ficará mais rica conforme adicionarmos novos snapshots mensais da aba <strong>patrimonio</strong>.</p>
-          </div>
-          <div class="patrimony-layout">
-            <div id="patrimonyCards" class="mini-kpi-grid"></div>
-            <div id="patrimonyEvolution" class="patrimony-evolution"></div>
-          </div>
-        </article>
+        <div id="cashKpis" class="kpi-grid five"></div>
 
         <div class="grid-2">
           <article class="card">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Qualidade dos dados</p>
-                <h2>Pendências</h2>
+                <p class="eyebrow">Cartões</p>
+                <h3>Faturas e compromissos</h3>
               </div>
             </div>
-            <div id="pendingSummary"></div>
+            <div id="cardsPanel" class="cards-list"></div>
           </article>
-
           <article class="card">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Orçamento</p>
-                <h2 id="budgetPanelTitle">Resumo do mês</h2>
+                <p class="eyebrow">Caixa</p>
+                <h3>Entradas e saídas efetivas</h3>
               </div>
-              <p id="budgetPanelNote" class="section-note">Quando existir orçamento/forecast para o mês, ele aparece aqui e nas tabelas comparativas.</p>
             </div>
-            <div id="budgetPanel"></div>
+            <div id="cashPanel" class="cash-panel"></div>
           </article>
         </div>
 
         <article class="card">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">Forecast anual</p>
-              <h2>Resultado e reserva</h2>
+              <p class="eyebrow">Conciliação</p>
+              <h3>Como ler cartão, competência e caixa</h3>
             </div>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Mês</th>
-                  <th>Receita forecast</th>
-                  <th>Despesas forecast</th>
-                  <th>Aporte reserva</th>
-                  <th>Resultado antes da reserva</th>
-                </tr>
-              </thead>
-              <tbody id="forecastTable"></tbody>
-            </table>
+          <div class="explain-grid">
+            <div><strong>Competência</strong><span>Compra entra quando a decisão de consumo acontece.</span></div>
+            <div><strong>Cartão</strong><span>Mostra a obrigação acumulada na fatura, inclusive terceiros.</span></div>
+            <div><strong>Caixa</strong><span>Dinheiro sai quando a fatura ou a despesa é efetivamente paga.</span></div>
           </div>
         </article>
       </section>
 
-      <p class="footer-note">Fonte oficial: Google Sheets privado. Este app mantém apenas uma cópia local para visualização.</p>
+      <p class="footer-note">O dashboard é uma camada de leitura. A fonte de verdade continua sendo a Base Mestre.</p>
     </section>
   </main>
-
-  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <div id="toast" class="toast hidden" role="status"></div>
 </body>
 </html>
