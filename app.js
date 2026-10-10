@@ -13,7 +13,7 @@ const labels={
   IMOVEL_ALUGADO:'Imóvel próprio',VEICULO:'Veículo',VITOR:'Vitor',CASA:'Casa',TRANSPORTE:'Transporte',
   ALIMENTACAO:'Alimentação',SAUDE:'Saúde',PESSOAL_RAUL:'Pessoal Raul',PESSOAL_LETICIA:'Pessoal Letícia',
   ASSINATURAS:'Assinaturas',IA_TECNOLOGIA:'IA e tecnologia',PRESENTES_EVENTOS:'Presentes e eventos',
-  PETS:'Pets',VIAGEM:'Viagem',DIVIDA_PESSOAL:'Empréstimo pessoal',A_CLASSIFICAR:'A classificar'
+  PETS:'Pets',BEBIDAS_ALCOOLICAS:'Bebidas alcoólicas',VIAGEM:'Viagem',DIVIDA_PESSOAL:'Empréstimo pessoal',A_CLASSIFICAR:'A classificar'
 };
 
 function n(v){
@@ -94,7 +94,7 @@ function months(){
   const s=new Set();
   movements().forEach(r=>[pm(r.competencia||r.data_transacao),pm(r.data_caixa)].forEach(x=>x&&s.add(x)));
   planning().forEach(r=>{const x=pm(r.competencia);if(x)s.add(x)});
-  const wb=state.data?.sheets?.orcamento_v2||state.data?.sheets?.orcamento_v1||[];
+  const wb=state.data?.sheets?.orcamento_v3||state.data?.sheets?.orcamento_v2||state.data?.sheets?.orcamento_v1||[];
   wb.forEach(r=>Object.keys(r).filter(k=>/^\d{4}-\d{2}$/.test(k)&&n(r[k])!==0).forEach(k=>s.add(k)));
   return[...s].sort();
 }
@@ -112,6 +112,13 @@ function workdayCounts(m){
   const[y,mo]=m.split('-').map(Number),last=daysInMonth(m),today=selectedRelation(m)==='current'?new Date().getDate():last;
   let total=0,elapsed=0;
   for(let d=1;d<=last;d++){const dow=new Date(Date.UTC(y,mo-1,d)).getUTCDay();if(dow>=1&&dow<=5){total++;if(d<=today)elapsed++;}}
+  if(selectedRelation(m)==='future')elapsed=0;
+  return{total,elapsed,ratio:total?elapsed/total:0};
+}
+function weekdayEventCounts(m,days){
+  const[y,mo]=m.split('-').map(Number),last=daysInMonth(m),today=selectedRelation(m)==='current'?new Date().getDate():last;
+  let total=0,elapsed=0;
+  for(let d=1;d<=last;d++){const dow=new Date(Date.UTC(y,mo-1,d)).getUTCDay();if(days.includes(dow)){total++;if(d<=today)elapsed++;}}
   if(selectedRelation(m)==='future')elapsed=0;
   return{total,elapsed,ratio:total?elapsed/total:0};
 }
@@ -154,6 +161,7 @@ function canonSub(category,sub='',desc=''){
     if(/restaurante|delivery|ifood|fast.?food|mcdonald/.test(s))return'Restaurantes';
     if(/trabalho|almo[cç]o/.test(s))return'Alimentação dia a dia — trabalho Raul';
   }
+  if(c==='BEBIDAS_ALCOOLICAS')return String(sub||'').trim()||'Cerveja / chopp';
   if(c==='TRANSPORTE'&&/trabalho|ônibus|onibus|autopass|transurc/.test(s))return'Deslocamento trabalho Raul';
   return String(sub||'').trim()||labels[c]||c||'Outros';
 }
@@ -161,6 +169,7 @@ function budgetKey(category,sub){return String(category||'').toUpperCase()+'|'+c
 function movementKey(r){return budgetKey(r.categoria,canonSub(r.categoria,r.subcategoria,r.descricao_original))}
 
 function wideBudgetSheet(){
+  if(state.data?.sheets?.orcamento_v3?.length)return{name:'orcamento_v3',label:'Orçamento V3 · aprovado',rows:state.data.sheets.orcamento_v3};
   if(state.data?.sheets?.orcamento_v2?.length)return{name:'orcamento_v2',label:'Orçamento V2 · rascunho',rows:state.data.sheets.orcamento_v2};
   if(state.data?.sheets?.orcamento_v1?.length)return{name:'orcamento_v1',label:'Orçamento V1 · rascunho',rows:state.data.sheets.orcamento_v1};
   return null;
@@ -203,6 +212,14 @@ function forecastValue(method,budget,realized,month=state.month){
   }
   if(m==='PACING_DIAS_UTEIS'){
     const ratio=workdayCounts(month).ratio;if(ratio<.15)return Math.max(realized,budget);
+    return Math.max(realized,realized/Math.max(ratio,.01));
+  }
+  if(m==='PACING_SABADOS'){
+    const ratio=weekdayEventCounts(month,[6]).ratio;if(ratio<.15)return Math.max(realized,budget);
+    return Math.max(realized,realized/Math.max(ratio,.01));
+  }
+  if(m==='PACING_FINS_DE_SEMANA'){
+    const ratio=weekdayEventCounts(month,[0,6]).ratio;if(ratio<.15)return Math.max(realized,budget);
     return Math.max(realized,realized/Math.max(ratio,.01));
   }
   return Math.max(realized,budget);
