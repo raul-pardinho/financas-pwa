@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION='2.0.0-beta.3',DB='financas_dashboard_v2',STORE='workbook',THEME='financas_theme_v2';
+const APP_VERSION='2.0.0',DB='financas_dashboard_v2',STORE='workbook',THEME='financas_theme_v2';
 const state={data:null,month:null,page:'overview',theme:'light'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
@@ -507,7 +507,7 @@ async function init(){
   applyTheme(localStorage.getItem(THEME)||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
   bind();try{state.data=await dbGet()}catch(e){}
   if(state.data)populateMonths();selectPage('overview');render();
-  if(!window.FINANCAS_PREVIEW&&'serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  if(!window.FINANCAS_PREVIEW&&'serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=2.0.0',{updateViaCache:'none'}).catch(()=>{});
 }
 document.addEventListener('DOMContentLoaded',init);
 })();
