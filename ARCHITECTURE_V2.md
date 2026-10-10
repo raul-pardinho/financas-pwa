@@ -41,6 +41,8 @@ Regras iniciais:
 - **EVENTO**: usa o valor conhecido do evento; não extrapola por pacing.
 - **PACING_CALENDARIO**: extrapola o realizado pelos dias corridos.
 - **PACING_DIAS_UTEIS**: extrapola o realizado pelos dias úteis.
+- **PACING_SABADOS**: acompanha a cadência por sábados do mês (ex.: supermercado e bebidas alcoólicas).
+- **PACING_FINS_DE_SEMANA**: acompanha sábados + domingos do mês (ex.: restaurantes).
 - Nos primeiros 15% do mês, o forecast não reduz automaticamente abaixo do orçamento por falta de movimentos.
 - Em meses passados, o forecast converge para o realizado.
 - Em meses futuros, o forecast começa igual ao orçamento.
@@ -74,7 +76,7 @@ Estrutura pacificada:
 
 ## Fonte de orçamento
 
-Enquanto a revisão estiver em andamento, o branch V2 reconhece **orcamento_v2** como fonte de orçamento e a identifica visualmente como **rascunho**.
+O branch V2 reconhece **orcamento_v3** como fonte prioritária de orçamento e a identifica visualmente como **aprovado**. As versões V2/V1 permanecem como fallback/histórico.
 
 A estrutura também suporta cenário **META** na aba `planejamento`. Enquanto não houver linhas META, a interface mostra **Meta: A definir**.
 
