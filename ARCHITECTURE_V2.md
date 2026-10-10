@@ -83,3 +83,8 @@ A estrutura também suporta cenário **META** na aba `planejamento`. Enquanto n�
 ## Regra de publicação
 
 O branch `dashboard-v2` é experimental. O `main` continua sendo a versão estável até revisão funcional, reconciliação dos números e aprovação da interface.
+
+
+## Fonte de Meta
+
+Enquanto a Meta estiver em revisão, o branch V2 reconhece a aba **meta_v1** como fonte prioritária do cenário META. Ela é deliberadamente separada do **orcamento_v3**: o orçamento permanece o baseline aprovado; a meta representa o desafio de eficiência. Se meta_v1 não existir, o app usa linhas com cenário `META` da aba `planejamento`.
