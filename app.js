@@ -495,7 +495,7 @@ async function init(){
   applyTheme(localStorage.getItem(THEME)||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
   bind();try{state.data=await dbGet()}catch(e){}
   if(state.data)populateMonths();selectPage('overview');render();
-  if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  if(!window.FINANCAS_PREVIEW&&'serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 document.addEventListener('DOMContentLoaded',init);
 })();
