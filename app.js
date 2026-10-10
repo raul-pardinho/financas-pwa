@@ -554,7 +554,7 @@ async function init(){
   applyTheme(localStorage.getItem(THEME)||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
   bind();try{state.data=await dbGet()}catch(e){}
   if(state.data)populateMonths();selectPage('overview');render();
-  if(!window.FINANCAS_PREVIEW&&'serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=2.0.0',{updateViaCache:'none'}).catch(()=>{});
+  if(!window.FINANCAS_PREVIEW&&'serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=2.0.1',{updateViaCache:'none'}).catch(()=>{});
 }
 document.addEventListener('DOMContentLoaded',init);
 })();
