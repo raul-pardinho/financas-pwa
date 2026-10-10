@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION='2.0.0-beta.1',DB='financas_dashboard_v2',STORE='workbook',THEME='financas_theme_v2';
+const APP_VERSION='2.0.0-beta.2',DB='financas_dashboard_v2',STORE='workbook',THEME='financas_theme_v2';
 const state={data:null,month:null,page:'overview',theme:'light'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
@@ -98,7 +98,9 @@ function months(){
   wb.forEach(r=>Object.keys(r).filter(k=>/^\d{4}-\d{2}$/.test(k)&&n(r[k])!==0).forEach(k=>s.add(k)));
   return[...s].sort();
 }
-function todayIso(){return new Date().toISOString().slice(0,10)}
+function todayIso(){
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+}
 function selectedRelation(m=state.month){
   const cur=todayIso().slice(0,7);
   return m<cur?'past':m>cur?'future':'current';
@@ -106,17 +108,17 @@ function selectedRelation(m=state.month){
 function daysInMonth(m){const[y,mo]=m.split('-').map(Number);return new Date(Date.UTC(y,mo,0)).getUTCDate()}
 function calendarRatio(m){
   const rel=selectedRelation(m);if(rel==='past')return 1;if(rel==='future')return 0;
-  return Math.min(1,new Date().getDate()/daysInMonth(m));
+  return Math.min(1,Number(todayIso().slice(8,10))/daysInMonth(m));
 }
 function workdayCounts(m){
-  const[y,mo]=m.split('-').map(Number),last=daysInMonth(m),today=selectedRelation(m)==='current'?new Date().getDate():last;
+  const[y,mo]=m.split('-').map(Number),last=daysInMonth(m),today=selectedRelation(m)==='current'?Number(todayIso().slice(8,10)):last;
   let total=0,elapsed=0;
   for(let d=1;d<=last;d++){const dow=new Date(Date.UTC(y,mo-1,d)).getUTCDay();if(dow>=1&&dow<=5){total++;if(d<=today)elapsed++;}}
   if(selectedRelation(m)==='future')elapsed=0;
   return{total,elapsed,ratio:total?elapsed/total:0};
 }
 function weekdayEventCounts(m,days){
-  const[y,mo]=m.split('-').map(Number),last=daysInMonth(m),today=selectedRelation(m)==='current'?new Date().getDate():last;
+  const[y,mo]=m.split('-').map(Number),last=daysInMonth(m),today=selectedRelation(m)==='current'?Number(todayIso().slice(8,10)):last;
   let total=0,elapsed=0;
   for(let d=1;d<=last;d++){const dow=new Date(Date.UTC(y,mo-1,d)).getUTCDay();if(days.includes(dow)){total++;if(d<=today)elapsed++;}}
   if(selectedRelation(m)==='future')elapsed=0;
@@ -155,11 +157,12 @@ function operationalExpense(r){
 }
 function canonSub(category,sub='',desc=''){
   const c=String(category||'').toUpperCase(),s=(String(sub||'')+' '+String(desc||'')).toLowerCase();
+  if(c==='PESSOAL_RAUL'||c==='PESSOAL_LETICIA')return'Cota pessoal';
   if(c==='ALIMENTACAO'){
     if(/supermerc/.test(s))return'Supermercado';
     if(/conveni|padaria|oxxo/.test(s))return'Conveniência';
-    if(/restaurante|delivery|ifood|fast.?food|mcdonald/.test(s))return'Restaurantes';
     if(/trabalho|almo[cç]o/.test(s))return'Alimentação dia a dia — trabalho Raul';
+    if(/restaurante|delivery|ifood|fast.?food|mcdonald/.test(s))return'Restaurantes';
   }
   if(c==='BEBIDAS_ALCOOLICAS')return String(sub||'').trim()||'Cerveja / chopp';
   if(c==='TRANSPORTE'&&/trabalho|ônibus|onibus|autopass|transurc/.test(s))return'Deslocamento trabalho Raul';
@@ -187,7 +190,7 @@ function budgetLines(month=state.month){
     .map(r=>({nature:n(r.valor)>=0?'RECEITA':'DESPESA',group:String(r.grupo||''),category:String(r.categoria||''),sub:String(r.subcategoria||''),holder:String(r.titular||''),method:'',value:Math.abs(n(r.valor)),source:'Planejamento oficial'}));
 }
 function wideMetaSheet(){
-  if(state.data?.sheets?.meta_v1?.length)return{name:'meta_v1',label:'Meta V1 · sugestão',rows:state.data.sheets.meta_v1};
+  if(state.data?.sheets?.meta_v1?.length)return{name:'meta_v1',label:'Meta V1 · aprovada',rows:state.data.sheets.meta_v1};
   return null;
 }
 function metaLines(month=state.month){
@@ -218,19 +221,19 @@ function forecastValue(method,budget,realized,month=state.month){
   const rel=selectedRelation(month);if(rel==='past')return realized;if(rel==='future')return budget;
   const m=String(method||'').toUpperCase();
   if(m==='PACING_CALENDARIO'){
-    const ratio=calendarRatio(month);if(ratio<.15)return Math.max(realized,budget);
+    const ratio=calendarRatio(month);if(realized===0||ratio<.15)return budget;
     return Math.max(realized,realized/Math.max(ratio,.01));
   }
   if(m==='PACING_DIAS_UTEIS'){
-    const ratio=workdayCounts(month).ratio;if(ratio<.15)return Math.max(realized,budget);
+    const ratio=workdayCounts(month).ratio;if(realized===0||ratio<.15)return budget;
     return Math.max(realized,realized/Math.max(ratio,.01));
   }
   if(m==='PACING_SABADOS'){
-    const ratio=weekdayEventCounts(month,[6]).ratio;if(ratio<.15)return Math.max(realized,budget);
+    const ratio=weekdayEventCounts(month,[6]).ratio;if(realized===0||ratio<.15)return budget;
     return Math.max(realized,realized/Math.max(ratio,.01));
   }
   if(m==='PACING_FINS_DE_SEMANA'){
-    const ratio=weekdayEventCounts(month,[0,6]).ratio;if(ratio<.15)return Math.max(realized,budget);
+    const ratio=weekdayEventCounts(month,[0,6]).ratio;if(realized===0||ratio<.15)return budget;
     return Math.max(realized,realized/Math.max(ratio,.01));
   }
   return Math.max(realized,budget);
@@ -248,9 +251,10 @@ function categoryRows(month=state.month){
   for(const[key,x]of out){
     x.realized=real.get(key)?.value||0;
     x.meta=meta.has(key)?meta.get(key):null;
+    x.hasMetaChallenge=x.meta!=null&&Math.abs(x.meta-x.budget)>.01;
     x.forecast=forecastValue(x.method,x.budget,x.realized,month);
     x.deltaBudget=x.forecast-x.budget;
-    x.deltaMeta=x.meta==null?null:x.forecast-x.meta;
+    x.deltaMeta=x.hasMetaChallenge?x.forecast-x.meta:null;
   }
   return[...out.values()].sort((a,b)=>Math.max(b.budget,b.forecast,b.realized)-Math.max(a.budget,a.forecast,a.realized));
 }
@@ -269,13 +273,23 @@ function monthlySummary(month=state.month){
 }
 function statusFor(row){
   if(!row.budget)return'neutral';
-  const ratio=row.forecast/row.budget;
-  if(row.meta!=null&&row.forecast<=row.meta)return'good';
-  if(ratio<=1)return'good';
-  if(ratio<=1.08)return'warn';
+  if(row.hasMetaChallenge){
+    if(row.forecast<=row.meta)return'good';
+    if(row.forecast<=row.budget)return'warn';
+    return'bad';
+  }
+  if(row.forecast<=row.budget)return'good';
   return'bad';
 }
-function statusText(s){return s==='good'?'No caminho':s==='warn'?'Atenção':s==='bad'?'Acima':'Sem orçamento'}
+function statusText(row,s){
+  if(s==='neutral')return'Sem orçamento';
+  if(row.hasMetaChallenge){
+    if(s==='good')return'Meta atingida';
+    if(s==='warn')return'Acima da meta';
+    return'Acima do orçamento';
+  }
+  return s==='good'?'Dentro do orçamento':'Acima do orçamento';
+}
 
 function latestPatrimony(){
   const snaps=patrimonySnapshots();return snaps.at(-1)||{key:null,assets:0,liabilities:0,net:0,liquid:0,familyReserve:0,items:[]};
@@ -314,7 +328,10 @@ function debtRows(){
   return p.items.filter(r=>String(r.classe||'').toUpperCase()==='PASSIVO').map(r=>{
     const group=String(r.grupo||'').toUpperCase();
     let monthly=0;
-    const par=activeInstallmentRows().find(x=>String(x.categoria||'').toUpperCase()===group&&!x.terceiro);
+    const candidates=activeInstallmentRows().filter(x=>String(x.categoria||'').toUpperCase()===group&&!x.terceiro&&!String(x.responsavel_terceiro||'').trim());
+    const par=group==='VEICULO'
+      ? candidates.find(x=>/financiamento/i.test(String(x.subcategoria||'')+' '+String(x.descricao||'')))||null
+      : candidates.find(x=>group==='DIVIDA_PESSOAL'||/financiamento|empr[eé]stimo/i.test(String(x.subcategoria||'')+' '+String(x.descricao||'')))||null;
     if(par)monthly=Math.abs(n(par.valor_parcela));
     if(!monthly){
       const match=b.find(x=>x.nature==='DESPESA'&&String(x.category||'').toUpperCase()===(group==='IMOVEL'?'IMOVEL_ALUGADO':group)&&/financ/i.test(x.sub));
@@ -356,9 +373,10 @@ function kpi(label,value,sub='',tone=''){
 }
 function renderOverview(){
   const s=monthlySummary(),delta=s.forecastExpense-s.budgetExpense,meta=s.metaExpense;
-  const health=!s.budgetExpense?'neutral':delta<=0?'good':delta/s.budgetExpense<=.05?'warn':'bad';
+  const health=!s.budgetExpense?'neutral':meta!=null&&s.forecastExpense<=meta?'good':s.forecastExpense<=s.budgetExpense?'warn':'bad';
   $('#overviewTitle').textContent='Como estamos em '+monthLabel(state.month);
-  $('#monthHealth').className='status-pill '+health;$('#monthHealth').textContent=health==='good'?'Dentro do orçamento':health==='warn'?'Atenção ao fechamento':health==='bad'?'Pressão no orçamento':'Sem orçamento';
+  $('#monthHealth').className='status-pill '+health;
+  $('#monthHealth').textContent=health==='good'?'Meta no caminho':health==='warn'?'Dentro do orçamento · acima da meta':health==='bad'?'Acima do orçamento':'Sem orçamento';
   $('#overviewKpis').innerHTML=[
     kpi('Receita realizada',s.realizedIncome,'Receita confirmada por competência'),
     kpi('Orçamento',s.budgetExpense,'Teto realista do mês'),
@@ -379,9 +397,10 @@ function renderOverview(){
 }
 function renderAlerts(){
   const cats=categoryRows(),alerts=[];
-  cats.filter(x=>x.budget>0&&x.forecast>x.budget*1.08&&x.deltaBudget>100).sort((a,b)=>b.deltaBudget-a.deltaBudget).slice(0,4).forEach(x=>alerts.push({tone:'bad',title:x.sub,text:'Forecast '+money.format(x.forecast)+' · '+money.format(x.deltaBudget)+' acima do orçamento.'}));
-  cats.filter(x=>x.budget>0&&x.realized>x.budget).sort((a,b)=>b.realized-a.realized).slice(0,2).forEach(x=>alerts.push({tone:'warn',title:x.sub,text:'O realizado já ultrapassou o orçamento antes do fechamento.'}));
-  if(!metaLines().length)alerts.push({tone:'neutral',title:'Meta ainda não cadastrada',text:'O código já suporta META por categoria. Vamos defini-la depois de aprovar o orçamento 2027.'});
+  cats.filter(x=>x.budget>0&&x.forecast>x.budget&&x.deltaBudget>100).sort((a,b)=>b.deltaBudget-a.deltaBudget).slice(0,3).forEach(x=>alerts.push({tone:'bad',title:x.sub,text:'Forecast '+money.format(x.forecast)+' · '+money.format(x.deltaBudget)+' acima do orçamento.'}));
+  cats.filter(x=>x.hasMetaChallenge&&x.forecast>x.meta&&x.forecast<=x.budget&&x.deltaMeta>75).sort((a,b)=>b.deltaMeta-a.deltaMeta).slice(0,3).forEach(x=>alerts.push({tone:'warn',title:x.sub,text:'Dentro do Budget, mas '+money.format(x.deltaMeta)+' acima da Meta.'}));
+  cats.filter(x=>x.budget>0&&x.realized>x.budget).sort((a,b)=>b.realized-a.realized).slice(0,2).forEach(x=>alerts.push({tone:'bad',title:x.sub,text:'O realizado já ultrapassou o orçamento antes do fechamento.'}));
+  if(!metaLines().length)alerts.push({tone:'neutral',title:'Meta ainda não cadastrada',text:'Não há cenário META disponível para este período.'});
   if(!alerts.length)alerts.push({tone:'good',title:'Sem alertas relevantes',text:'Nenhuma categoria apresenta desvio material no momento.'});
   $('#alertsPanel').innerHTML=alerts.slice(0,5).map(a=>'<div class="alert '+a.tone+'"><span class="icon">'+(a.tone==='bad'?'!':a.tone==='warn'?'△':a.tone==='good'?'✓':'i')+'</span><div><strong>'+a.title+'</strong><span>'+a.text+'</span></div></div>').join('');
 }
@@ -398,13 +417,13 @@ function renderBudget(){
     kpi('Forecast',s.forecastExpense,(delta>=0?'+':'')+money.format(delta)+' vs orçamento',delta<=0?'good':delta/s.budgetExpense<=.05?'warn':'bad'),
     kpi('Resultado projetado',s.forecastResult,'Receita menos forecast',s.forecastResult>=0?'good':'bad')
   ].join('');
-  $('#pacingNote').textContent='Forecast: fixos/eventos usam valor conhecido; variáveis usam pacing '+(selectedRelation()==='current'?'MTD':'do período')+' por dias corridos ou úteis.';
+  $('#pacingNote').textContent='Forecast: fixos/eventos usam valor conhecido; variáveis usam pacing '+(selectedRelation()==='current'?'MTD':'do período')+' por dias corridos, úteis ou fins de semana.';
   $('#budgetTable').innerHTML=cats.map(x=>{
     const st=statusFor(x),db=x.deltaBudget,dm=x.deltaMeta;
-    return'<tr><td class="row-title">'+x.sub+'</td><td>'+money.format(x.budget)+'</td><td>'+(x.meta==null?'—':money.format(x.meta))+'</td><td>'+money.format(x.realized)+'</td><td>'+money.format(x.forecast)+'</td><td class="delta '+(db>0?'bad':'good')+'">'+(db>0?'+':'')+money.format(db)+'</td><td class="delta '+(dm==null?'':dm>0?'bad':'good')+'">'+(dm==null?'—':(dm>0?'+':'')+money.format(dm))+'</td><td><span class="table-status '+st+'">'+statusText(st)+'</span></td></tr>';
+    return'<tr><td class="row-title">'+x.sub+'</td><td>'+money.format(x.budget)+'</td><td>'+(x.hasMetaChallenge?money.format(x.meta):'—')+'</td><td>'+money.format(x.realized)+'</td><td>'+money.format(x.forecast)+'</td><td class="delta '+(db>0?'bad':'good')+'">'+(db>0?'+':'')+money.format(db)+'</td><td class="delta '+(dm==null?'':dm>0?'bad':'good')+'">'+(dm==null?'—':(dm>0?'+':'')+money.format(dm))+'</td><td><span class="table-status '+st+'">'+statusText(x,st)+'</span></td></tr>';
   }).join('')||'<tr><td colspan="8">Sem orçamento para o mês.</td></tr>';
   const top=cats.filter(x=>Math.max(x.budget,x.forecast,x.realized)>0).slice(0,10),mx=Math.max(...top.map(x=>Math.max(x.budget,x.meta||0,x.realized,x.forecast)),1);
-  $('#budgetChart').innerHTML=top.map(x=>'<div class="budget-chart-row"><span class="category-label">'+x.sub+'</span><div class="bars"><div class="tiny-track"><div class="tiny-fill budget" style="width:'+x.budget/mx*100+'%"></div></div>'+(x.meta==null?'':'<div class="tiny-track"><div class="tiny-fill target" style="width:'+x.meta/mx*100+'%"></div></div>')+'<div class="tiny-track"><div class="tiny-fill realized" style="width:'+x.realized/mx*100+'%"></div></div><div class="tiny-track"><div class="tiny-fill forecast" style="width:'+x.forecast/mx*100+'%"></div></div></div><span class="bar-caption">'+money.format(x.forecast)+'</span></div>').join('');
+  $('#budgetChart').innerHTML=top.map(x=>'<div class="budget-chart-row"><span class="category-label">'+x.sub+'</span><div class="bars"><div class="tiny-track"><div class="tiny-fill budget" style="width:'+x.budget/mx*100+'%"></div></div>'+(x.hasMetaChallenge?'<div class="tiny-track"><div class="tiny-fill target" style="width:'+x.meta/mx*100+'%"></div></div>':'')+'<div class="tiny-track"><div class="tiny-fill realized" style="width:'+x.realized/mx*100+'%"></div></div><div class="tiny-track"><div class="tiny-fill forecast" style="width:'+x.forecast/mx*100+'%"></div></div></div><span class="bar-caption">'+money.format(x.forecast)+'</span></div>').join('');
 }
 function renderPatrimony(){
   const s=patrimonySnapshots(),p=s.at(-1)||{assets:0,liabilities:0,net:0,liquid:0,familyReserve:0,items:[]};
