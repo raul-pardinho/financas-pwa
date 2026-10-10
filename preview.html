@@ -65,7 +65,7 @@ main{max-width:1500px;margin:0 auto;padding:22px clamp(14px,4vw,48px) 60px}
 (()=>{
 const APP_VERSION='2.0.0-beta.2',DB='financas_dashboard_v2',STORE='workbook',THEME='financas_theme_v2';
 const state={data:null,month:null,page:'overview',theme:'light'};
-const $=s=>document.querySelector(s),$=s=>[...document.querySelectorAll(s)];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
 const pctFmt=new Intl.NumberFormat('pt-BR',{style:'percent',minimumFractionDigits:0,maximumFractionDigits:1});
 const monthFmt=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'});
@@ -537,7 +537,7 @@ function populateMonths(){
   $('#monthSelect').innerHTML=a.map(m=>'<option value="'+m+'" '+(m===state.month?'selected':'')+'>'+monthLabel(m)+'</option>').join('');
 }
 function selectPage(page){
-  state.page=page;$('.page').forEach(x=>x.classList.toggle('active',x.dataset.page===page));$('.tab').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
+  state.page=page;$$('.page').forEach(x=>x.classList.toggle('active',x.dataset.page===page));$$('.tab').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
 }
 function applyTheme(t){
   state.theme=t;document.documentElement.setAttribute('data-theme',t);localStorage.setItem(THEME,t);
@@ -549,7 +549,7 @@ async function importFile(file){
 }
 function bind(){
   $('#fileInput').addEventListener('change',e=>e.target.files?.[0]&&importFile(e.target.files[0]));
-  $('.file-input-mirror').forEach(el=>el.addEventListener('change',e=>e.target.files?.[0]&&importFile(e.target.files[0])));
+  $$('.file-input-mirror').forEach(el=>el.addEventListener('change',e=>e.target.files?.[0]&&importFile(e.target.files[0])));
   $('#monthSelect').addEventListener('change',e=>{state.month=e.target.value;render()});
   $('.tabs').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)selectPage(b.dataset.page)});
   $('#themeToggle').addEventListener('click',()=>applyTheme(state.theme==='dark'?'light':'dark'));
