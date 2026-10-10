@@ -242,7 +242,7 @@ function forecastValue(method,budget,realized,month=state.month){
 function forecastSignal(row,month=state.month){
   const rel=selectedRelation(month),method=String(row.method||'').toUpperCase();
   if(rel==='future')return'planned';
-  if(rel==='current'&&method.startsWith('PACING_')&&row.realized===0)return'pending';
+  if(rel==='current'&&row.realized===0&&(row.hasMetaChallenge||method.startsWith('PACING_')))return'pending';
   return'observed';
 }
 function categoryRows(month=state.month){
