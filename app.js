@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION='2.0.0',DB='financas_dashboard_v2',STORE='workbook',THEME='financas_theme_v2';
+const APP_VERSION='2.0.1',DB='financas_dashboard_v2',STORE='workbook',THEME='financas_theme_v2';
 const state={data:null,month:null,page:'overview',theme:'light'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
@@ -159,14 +159,61 @@ function canonSub(category,sub='',desc=''){
   const c=String(category||'').toUpperCase(),s=(String(sub||'')+' '+String(desc||'')).toLowerCase();
   if(c==='PESSOAL_RAUL')return'Cota pessoal — Raul';
   if(c==='PESSOAL_LETICIA')return'Cota pessoal — Letícia';
+  if(c==='MORADIA_ATUAL'){
+    if(/condom/.test(s))return'Condomínio';
+    if(/seguro/.test(s))return'Seguro residencial anual';
+    return'Aluguel residência';
+  }
+  if(c==='CASA'){
+    if(/água|agua|sanasa/.test(s))return'Água';
+    if(/energia|cpfl/.test(s))return'Energia';
+    if(/gás|gas|comgas/.test(s))return'Gás';
+    if(/internet|claro/.test(s))return'Internet';
+    if(/celular|tim/.test(s))return'Celular';
+    return'Pequenos itens para casa';
+  }
+  if(c==='IMOVEL_ALUGADO')return /iptu/.test(s)?'IPTU':'Financiamento';
+  if(c==='VEICULO'){
+    if(/financiamento/.test(s))return'Financiamento do carro';
+    if(/combust|posto/.test(s))return'Combustível';
+    if(/ipva/.test(s))return'IPVA';
+    if(/seguro/.test(s))return'Seguro automóvel';
+    return'Manutenção';
+  }
+  if(c==='TRANSPORTE'){
+    if(/sem parar/.test(s))return'Sem Parar';
+    if(/trabalho|ônibus|onibus|autopass|transurc/.test(s))return'Deslocamento trabalho Raul';
+    return'Apps / deslocamentos família';
+  }
   if(c==='ALIMENTACAO'){
     if(/supermerc/.test(s))return'Supermercado';
     if(/conveni|padaria|oxxo/.test(s))return'Conveniência';
     if(/trabalho|almo[cç]o/.test(s))return'Alimentação dia a dia — trabalho Raul';
     if(/restaurante|delivery|ifood|fast.?food|mcdonald/.test(s))return'Restaurantes';
+    return'Restaurantes';
   }
-  if(c==='BEBIDAS_ALCOOLICAS')return String(sub||'').trim()||'Cerveja / chopp';
-  if(c==='TRANSPORTE'&&/trabalho|ônibus|onibus|autopass|transurc/.test(s))return'Deslocamento trabalho Raul';
+  if(c==='BEBIDAS_ALCOOLICAS')return'Cerveja / chopp';
+  if(c==='VITOR'){
+    if(/escola mensal|mensalidade|escola$/.test(s))return'Escola mensal';
+    if(/capoeira/.test(s))return'Capoeira';
+    if(/nata[cç][aã]o/.test(s))return'Natação';
+    if(/col[oô]nia/.test(s))return'Colônia de férias';
+    if(/rematr/.test(s))return'Rematrícula';
+    if(/apresenta[cç][aã]o/.test(s))return'Apresentação escolar';
+    return'Extras / day care';
+  }
+  if(c==='SAUDE'){
+    if(/psicoterapia let[ií]cia/.test(s))return'Psicoterapia Letícia';
+    if(/psicoterapia raul/.test(s))return'Psicoterapia Raul — coberta pelo plano';
+    if(/academia/.test(s))return'Academia Letícia';
+    return'Farmácia / saúde';
+  }
+  if(c==='ASSINATURAS')return'Assinaturas familiares/digitais';
+  if(c==='IA_TECNOLOGIA')return'Assinaturas de IA';
+  if(c==='PRESENTES_EVENTOS')return /anivers[aá]rio vitor/.test(s)?'Aniversário Vitor':'Presentes / eventos diversos';
+  if(c==='PETS')return'Gastos recorrentes com pets';
+  if(c==='VIAGEM')return'Viagem doméstica anual';
+  if(c==='DIVIDA_PESSOAL')return'Empréstimo Nubank';
   return String(sub||'').trim()||labels[c]||c||'Outros';
 }
 function budgetKey(category,sub){return String(category||'').toUpperCase()+'|'+canonSub(category,sub)}
