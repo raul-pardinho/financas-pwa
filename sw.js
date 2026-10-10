@@ -1,5 +1,5 @@
-const CACHE='financas-v2.0.0';
-const LOCAL=['./','index.html','styles.css?v=2.0.0','app.js?v=2.0.0','manifest.webmanifest','assets/icon.svg'];
+const CACHE='financas-v2.0.1';
+const LOCAL=['./','index.html','styles.css?v=2.0.1','app.js?v=2.0.1','manifest.webmanifest','assets/icon.svg'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(LOCAL)).then(()=>self.skipWaiting()));
