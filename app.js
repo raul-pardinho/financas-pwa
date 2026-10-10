@@ -79,7 +79,7 @@ function parseWorkbook(buf,name){
   const wb=XLSX.read(buf,{type:'array',raw:false}),sheets={};
   wb.SheetNames.forEach(s=>{
     const matrix=XLSX.utils.sheet_to_json(wb.Sheets[s],{header:1,defval:'',raw:false});
-    sheets[s]=s.startsWith('orcamento_v')?wideBudgetRows(matrix):rows(matrix);
+    sheets[s]=(s.startsWith('orcamento_v')||s.startsWith('meta_v'))?wideBudgetRows(matrix):rows(matrix);
   });
   for(const req of ['movimentacoes','parcelamentos','patrimonio','controle'])if(!sheets[req])throw Error('Aba obrigatória ausente: '+req);
   return{fileName:name,importedAt:new Date().toISOString(),sheets};
@@ -186,9 +186,20 @@ function budgetLines(month=state.month){
   return planning().filter(r=>pm(r.competencia)===month&&String(r.cenario||'').toUpperCase()==='BUDGET'&&String(r.visao||'').toUpperCase()==='COMPETENCIA')
     .map(r=>({nature:n(r.valor)>=0?'RECEITA':'DESPESA',group:String(r.grupo||''),category:String(r.categoria||''),sub:String(r.subcategoria||''),holder:String(r.titular||''),method:'',value:Math.abs(n(r.valor)),source:'Planejamento oficial'}));
 }
+function wideMetaSheet(){
+  if(state.data?.sheets?.meta_v1?.length)return{name:'meta_v1',label:'Meta V1 · sugestão',rows:state.data.sheets.meta_v1};
+  return null;
+}
 function metaLines(month=state.month){
+  const wide=wideMetaSheet();
+  if(wide){
+    return wide.rows.filter(r=>n(r[month])!==0).map(r=>({
+      nature:String(r.Natureza||'').toUpperCase(),category:String(r.Categoria||''),sub:String(r.Subcategoria||''),
+      value:Math.abs(n(r[month])),source:wide.label
+    }));
+  }
   return planning().filter(r=>pm(r.competencia)===month&&String(r.cenario||'').toUpperCase()==='META'&&String(r.visao||'').toUpperCase()==='COMPETENCIA')
-    .map(r=>({nature:n(r.valor)>=0?'RECEITA':'DESPESA',category:String(r.categoria||''),sub:String(r.subcategoria||''),value:Math.abs(n(r.valor))}));
+    .map(r=>({nature:n(r.valor)>=0?'RECEITA':'DESPESA',category:String(r.categoria||''),sub:String(r.subcategoria||''),value:Math.abs(n(r.valor)),source:'Planejamento oficial'}));
 }
 function budgetSource(){return budgetLines()[0]?.source||'Sem orçamento para o período'}
 
@@ -430,7 +441,7 @@ function renderCash(){
 function renderMeta(){
   const c=controls(),when=state.data?.importedAt?new Date(state.data.importedAt).toLocaleString('pt-BR'):'—';
   $('#dataStatus').textContent='App '+APP_VERSION+' · Base '+(c.schema_version||'—')+' · '+when;
-  $('#budgetSource').textContent=budgetSource();
+  const meta=wideMetaSheet();$('#budgetSource').textContent=budgetSource()+(meta?' · '+meta.label:'');
 }
 function render(){
   if(!state.data){$('#emptyState').classList.remove('hidden');$('#appShell').classList.add('hidden');return}
