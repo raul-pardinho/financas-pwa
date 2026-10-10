@@ -87,4 +87,9 @@ O branch `dashboard-v2` é experimental. O `main` continua sendo a versão está
 
 ## Fonte de Meta
 
-Enquanto a Meta estiver em revisão, o branch V2 reconhece a aba **meta_v1** como fonte prioritária do cenário META. Ela é deliberadamente separada do **orcamento_v3**: o orçamento permanece o baseline aprovado; a meta representa o desafio de eficiência. Se meta_v1 não existir, o app usa linhas com cenário `META` da aba `planejamento`.
+O branch V2 reconhece a aba **meta_v1** aprovada como fonte prioritária do cenário META. Ela é deliberadamente separada do **orcamento_v3**: o orçamento permanece o baseline aprovado; a meta representa o desafio de eficiência aprovado. Se meta_v1 não existir, o app usa linhas com cenário `META` da aba `planejamento`.
+
+
+## Meta V1 aprovada
+
+A Meta V1 foi aprovada em 09/10/2026. Ela preserva o Budget V3 e propõe resultado anual de aproximadamente R$ 12,1 mil. Linhas sem redução explícita são tratadas como **sem meta específica** na tabela, mesmo que a aba meta_v1 replique o valor do Budget para composição do total anual. Celular e Sem Parar ficam como auditorias futuras, sem redução incorporada à meta vigente.
