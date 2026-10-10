@@ -11,7 +11,7 @@
   --line:rgba(16,35,45,.11);--line-strong:rgba(16,35,45,.18);
   --brand:#174e5e;--brand-2:#2b7b90;--brand-soft:#e4f0f3;
   --good:#1e7655;--warn:#b27312;--bad:#b64942;--neutral:#71858e;
-  --budget:#537782;--target:#8556a2;--realized:#1e7655;--forecast:#b27312;
+  --budget:#2457a6;--target:#8b4eb5;--realized:#15966a;--forecast:#d97a0b;
   --shadow:0 12px 34px rgba(20,55,66,.08);--radius:20px
 }
 html[data-theme="dark"]{
@@ -19,7 +19,7 @@ html[data-theme="dark"]{
   --line:rgba(237,245,247,.09);--line-strong:rgba(237,245,247,.17);
   --brand:#55a5ba;--brand-2:#79bfd0;--brand-soft:#19343e;
   --good:#5bc99a;--warn:#e8ae4c;--bad:#ef8179;--neutral:#9eb3bb;
-  --budget:#93aab2;--target:#c08dde;--realized:#5bc99a;--forecast:#e8ae4c;
+  --budget:#75a7f0;--target:#d1a0ee;--realized:#58d3a2;--forecast:#ffb34f;
   --shadow:0 16px 40px rgba(0,0,0,.28)
 }
 *{box-sizing:border-box}
@@ -41,7 +41,7 @@ main{max-width:1500px;margin:0 auto;padding:22px clamp(14px,4vw,48px) 60px}
 .alerts-list{display:grid;gap:9px}.alert{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:11px;border:1px solid var(--line);border-radius:13px;background:var(--surface-2)}.alert .icon{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;background:var(--brand-soft);color:var(--brand)}.alert.warn .icon{background:color-mix(in srgb,var(--warn) 12%,var(--surface));color:var(--warn)}.alert.bad .icon{background:color-mix(in srgb,var(--bad) 12%,var(--surface));color:var(--bad)}.alert.good .icon{background:color-mix(in srgb,var(--good) 12%,var(--surface));color:var(--good)}.alert strong{display:block;font-size:12px}.alert span{display:block;margin-top:2px;color:var(--muted);font-size:11px;line-height:1.4}
 .category-bars,.budget-chart{display:grid;gap:12px}.category-bar-row{display:grid;grid-template-columns:minmax(130px,1.2fr) 2fr 100px;gap:12px;align-items:center}.category-label{font-size:12px;font-weight:800}.dual-track{position:relative;height:16px;border-radius:999px;background:var(--surface-2);overflow:hidden}.dual-track .budget-mark{position:absolute;top:0;bottom:0;width:2px;background:var(--budget);opacity:.9}.dual-track .forecast-bar{height:100%;border-radius:inherit;background:var(--forecast);opacity:.9}.bar-caption{text-align:right;font-size:11px;font-weight:800}.bar-caption.bad{color:var(--bad)}.bar-caption.good{color:var(--good)}
 .metric-big{font-size:30px;font-weight:900;letter-spacing:-.05em}.metric-caption{margin-top:6px;color:var(--muted);font-size:11px;line-height:1.45}
-.legend-inline{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px}.legend-inline span{display:flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}.dot.budget{background:var(--budget)}.dot.target{background:var(--target)}.dot.realized{background:var(--realized)}.dot.forecast{background:var(--forecast)}
+.legend-inline{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px}.chart-heading{align-items:center}.chart-legend{padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}.legend-inline span{display:flex;align-items:center;gap:5px}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 0 1px color-mix(in srgb,currentColor 10%,transparent)}.dot.budget{background:var(--budget)}.dot.target{background:var(--target)}.dot.realized{background:var(--realized)}.dot.forecast{background:var(--forecast)}
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}table{border-collapse:separate;border-spacing:0;width:100%;min-width:970px}th,td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:right;font-size:12px;font-variant-numeric:tabular-nums}th{position:sticky;top:0;z-index:2;background:var(--surface-2);color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em}th:first-child,td:first-child{text-align:left}tbody tr:nth-child(odd){background:color-mix(in srgb,var(--surface-2) 64%,transparent)}tbody tr:hover{background:color-mix(in srgb,var(--brand-2) 7%,var(--surface))}.row-title{font-weight:800}.delta.bad{color:var(--bad);font-weight:800}.delta.good{color:var(--good);font-weight:800}
 .table-status{font-size:10px;font-weight:850;padding:5px 7px;border-radius:999px;background:var(--surface-2)}.table-status.good{color:var(--good)}.table-status.warn{color:var(--warn)}.table-status.bad{color:var(--bad)}.table-status.neutral{color:var(--neutral)}
 .budget-chart-row{display:grid;grid-template-columns:170px 1fr 110px;gap:12px;align-items:center}.budget-chart-row .bars{display:grid;gap:4px}.tiny-track{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden}.tiny-fill{height:100%;border-radius:inherit}.tiny-fill.budget{background:var(--budget)}.tiny-fill.target{background:var(--target)}.tiny-fill.realized{background:var(--realized)}.tiny-fill.forecast{background:var(--forecast)}
@@ -63,7 +63,7 @@ main{max-width:1500px;margin:0 auto;padding:22px clamp(14px,4vw,48px) 60px}
   <script>window.FINANCAS_PREVIEW=true;</script>
 <script>
 (()=>{
-const APP_VERSION='2.0.0-beta.2',DB='financas_dashboard_v2',STORE='workbook',THEME='financas_theme_v2';
+const APP_VERSION='2.0.0-beta.3',DB='financas_dashboard_v2',STORE='workbook',THEME='financas_theme_v2';
 const state={data:null,month:null,page:'overview',theme:'light'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
@@ -221,7 +221,8 @@ function operationalExpense(r){
 }
 function canonSub(category,sub='',desc=''){
   const c=String(category||'').toUpperCase(),s=(String(sub||'')+' '+String(desc||'')).toLowerCase();
-  if(c==='PESSOAL_RAUL'||c==='PESSOAL_LETICIA')return'Cota pessoal';
+  if(c==='PESSOAL_RAUL')return'Cota pessoal — Raul';
+  if(c==='PESSOAL_LETICIA')return'Cota pessoal — Letícia';
   if(c==='ALIMENTACAO'){
     if(/supermerc/.test(s))return'Supermercado';
     if(/conveni|padaria|oxxo/.test(s))return'Conveniência';
@@ -302,6 +303,12 @@ function forecastValue(method,budget,realized,month=state.month){
   }
   return Math.max(realized,budget);
 }
+function forecastSignal(row,month=state.month){
+  const rel=selectedRelation(month),method=String(row.method||'').toUpperCase();
+  if(rel==='future')return'planned';
+  if(rel==='current'&&method.startsWith('PACING_')&&row.realized===0)return'pending';
+  return'observed';
+}
 function categoryRows(month=state.month){
   const b=budgetLines(month).filter(r=>r.nature==='DESPESA'),real=realizedByKey(month),meta=metaByKey(month),out=new Map();
   b.forEach(r=>{
@@ -317,8 +324,9 @@ function categoryRows(month=state.month){
     x.meta=meta.has(key)?meta.get(key):null;
     x.hasMetaChallenge=x.meta!=null&&Math.abs(x.meta-x.budget)>.01;
     x.forecast=forecastValue(x.method,x.budget,x.realized,month);
+    x.signal=forecastSignal(x,month);
     x.deltaBudget=x.forecast-x.budget;
-    x.deltaMeta=x.hasMetaChallenge?x.forecast-x.meta:null;
+    x.deltaMeta=x.hasMetaChallenge&&x.signal==='observed'?x.forecast-x.meta:null;
   }
   return[...out.values()].sort((a,b)=>Math.max(b.budget,b.forecast,b.realized)-Math.max(a.budget,a.forecast,a.realized));
 }
@@ -337,6 +345,7 @@ function monthlySummary(month=state.month){
 }
 function statusFor(row){
   if(!row.budget)return'neutral';
+  if(row.signal==='pending'||row.signal==='planned')return'neutral';
   if(row.hasMetaChallenge){
     if(row.forecast<=row.meta)return'good';
     if(row.forecast<=row.budget)return'warn';
@@ -346,7 +355,9 @@ function statusFor(row){
   return'bad';
 }
 function statusText(row,s){
-  if(s==='neutral')return'Sem orçamento';
+  if(row.signal==='pending')return'Aguardando realizado';
+  if(row.signal==='planned')return'Planejado';
+  if(!row.budget)return'Sem orçamento';
   if(row.hasMetaChallenge){
     if(s==='good')return'Meta atingida';
     if(s==='warn')return'Acima da meta';
@@ -436,11 +447,12 @@ function kpi(label,value,sub='',tone=''){
   return'<article class="kpi '+tone+'"><span class="label">'+label+'</span><div class="value">'+display+'</div><div class="sub">'+sub+'</div></article>';
 }
 function renderOverview(){
-  const s=monthlySummary(),delta=s.forecastExpense-s.budgetExpense,meta=s.metaExpense;
-  const health=!s.budgetExpense?'neutral':meta!=null&&s.forecastExpense<=meta?'good':s.forecastExpense<=s.budgetExpense?'warn':'bad';
+  const s=monthlySummary(),delta=s.forecastExpense-s.budgetExpense,meta=s.metaExpense,cats=categoryRows();
+  const hasMetaEvidence=selectedRelation()!=='current'||cats.some(x=>x.hasMetaChallenge&&x.signal==='observed');
+  const health=!s.budgetExpense?'neutral':!hasMetaEvidence?'neutral':meta!=null&&s.forecastExpense<=meta?'good':s.forecastExpense<=s.budgetExpense?'warn':'bad';
   $('#overviewTitle').textContent='Como estamos em '+monthLabel(state.month);
   $('#monthHealth').className='status-pill '+health;
-  $('#monthHealth').textContent=health==='good'?'Meta no caminho':health==='warn'?'Dentro do orçamento · acima da meta':health==='bad'?'Acima do orçamento':'Sem orçamento';
+  $('#monthHealth').textContent=!s.budgetExpense?'Sem orçamento':!hasMetaEvidence?'Aguardando dados da meta':health==='good'?'Meta no caminho':health==='warn'?'Dentro do orçamento · acima da meta':'Acima do orçamento';
   $('#overviewKpis').innerHTML=[
     kpi('Receita realizada',s.realizedIncome,'Receita confirmada por competência'),
     kpi('Orçamento',s.budgetExpense,'Teto realista do mês'),
@@ -451,7 +463,7 @@ function renderOverview(){
   ].join('');
   const vals=[['Orçamento',s.budgetExpense,'budget'],...(meta==null?[]:[['Meta',meta,'target']]),['Realizado',s.realizedExpense,'realized'],['Forecast',s.forecastExpense,'forecast']],mx=Math.max(...vals.map(x=>x[1]),1);
   $('#monthlyProgress').innerHTML=vals.map(x=>'<div class="progress-line"><span class="progress-name">'+x[0]+'</span><div class="progress-track"><div class="progress-fill '+x[2]+'" style="width:'+Math.min(100,x[1]/mx*100)+'%"></div></div><span class="progress-value">'+money.format(x[1])+'</span></div>').join('')+
-    '<div class="progress-meta"><span>'+Math.round(calendarRatio(state.month)*100)+'% do mês corrido</span><span>Forecast '+(delta>0?'acima':'abaixo')+' do orçamento em '+money.format(Math.abs(delta))+'</span></div>';
+    '<div class="progress-meta"><span>'+Math.round(calendarRatio(state.month)*100)+'% do mês corrido</span><span>'+(Math.abs(delta)<.01?'Forecast igual ao orçamento':'Forecast '+(delta>0?'acima':'abaixo')+' do orçamento em '+money.format(Math.abs(delta)))+'</span></div>';
   renderAlerts();
   renderOverviewBars();
   const p=latestPatrimony(),d=debtRows().reduce((sum,x)=>sum+x.balance,0),t=thirdPartySummary();
@@ -462,7 +474,7 @@ function renderOverview(){
 function renderAlerts(){
   const cats=categoryRows(),alerts=[];
   cats.filter(x=>x.budget>0&&x.forecast>x.budget&&x.deltaBudget>100).sort((a,b)=>b.deltaBudget-a.deltaBudget).slice(0,3).forEach(x=>alerts.push({tone:'bad',title:x.sub,text:'Forecast '+money.format(x.forecast)+' · '+money.format(x.deltaBudget)+' acima do orçamento.'}));
-  cats.filter(x=>x.hasMetaChallenge&&x.forecast>x.meta&&x.forecast<=x.budget&&x.deltaMeta>75).sort((a,b)=>b.deltaMeta-a.deltaMeta).slice(0,3).forEach(x=>alerts.push({tone:'warn',title:x.sub,text:'Dentro do Budget, mas '+money.format(x.deltaMeta)+' acima da Meta.'}));
+  cats.filter(x=>x.hasMetaChallenge&&x.signal==='observed'&&x.forecast>x.meta&&x.forecast<=x.budget&&x.deltaMeta>75).sort((a,b)=>b.deltaMeta-a.deltaMeta).slice(0,3).forEach(x=>alerts.push({tone:'warn',title:x.sub,text:'Forecast '+money.format(x.forecast)+' · '+money.format(x.deltaMeta)+' acima da Meta, ainda dentro do Budget.'}));
   cats.filter(x=>x.budget>0&&x.realized>x.budget).sort((a,b)=>b.realized-a.realized).slice(0,2).forEach(x=>alerts.push({tone:'bad',title:x.sub,text:'O realizado já ultrapassou o orçamento antes do fechamento.'}));
   if(!metaLines().length)alerts.push({tone:'neutral',title:'Meta ainda não cadastrada',text:'Não há cenário META disponível para este período.'});
   if(!alerts.length)alerts.push({tone:'good',title:'Sem alertas relevantes',text:'Nenhuma categoria apresenta desvio material no momento.'});
@@ -687,12 +699,6 @@ document.addEventListener('DOMContentLoaded',init);
             <p class="eyebrow">Orçamento</p>
             <h2>Budget, Meta, Realizado e Forecast</h2>
           </div>
-          <div class="legend-inline">
-            <span><i class="dot budget"></i>Orçado</span>
-            <span><i class="dot target"></i>Meta</span>
-            <span><i class="dot realized"></i>Realizado</span>
-            <span><i class="dot forecast"></i>Forecast</span>
-          </div>
         </div>
 
         <div id="budgetKpis" class="kpi-grid five"></div>
@@ -725,10 +731,16 @@ document.addEventListener('DOMContentLoaded',init);
         </article>
 
         <article class="card">
-          <div class="section-heading">
+          <div class="section-heading chart-heading">
             <div>
               <p class="eyebrow">Leitura visual</p>
               <h3>Principais categorias</h3>
+            </div>
+            <div class="legend-inline chart-legend" aria-label="Legenda do gráfico">
+              <span><i class="dot budget"></i>Orçado</span>
+              <span><i class="dot target"></i>Meta</span>
+              <span><i class="dot realized"></i>Realizado</span>
+              <span><i class="dot forecast"></i>Forecast</span>
             </div>
           </div>
           <div id="budgetChart" class="budget-chart"></div>
